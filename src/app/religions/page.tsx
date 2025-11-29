@@ -2,82 +2,137 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Navigation from '@/components/Navigation'
 import AIChatWidget from '@/components/AIChatWidget'
-import { ArrowLeft, Search, BookOpen, Users, Calendar } from 'lucide-react'
+import BooksGrid from '@/components/BooksGrid'
+import VideosGrid from '@/components/VideosGrid'
+import { ArrowLeft, Search, BookOpen, Play, Users, Target, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
 interface Religion {
-  id: string
+  _id: string
   name: string
+  description: string
   introText: string
-  populationPercentage: number
   foundingDate?: string
   founder?: string
-  holyBooks: string
-  coreBeliefs: string
+  populationPercentage: number
+  currentFollowers: number
+  origin: {
+    country: string
+    region: string
+    continent: string
+  }
+  keyBeliefs: string[]
+  corePrinciples: string[]
+  sacredTexts: Array<{
+    title: string
+    author: string
+    language: string
+    approximateDate: string
+    description: string
+  }>
+  holyBooks: string[]
+  sects: Array<{
+    _id: string
+    name: string
+    description: string
+    numberOfFollowers: number
+  }>
+  scholars: Array<{
+    _id: string
+    name: string
+    era: string
+    isUniversallyRespected: boolean
+  }>
+  books: Array<{
+    _id: string
+    title: string
+    author: string
+    rating: number
+  }>
+  videos: Array<{
+    _id: string
+    title: string
+    youtubeId: string
+    rating: number
+  }>
+  practices: Array<{
+    _id: string
+    title: string
+    category: string
+    rating: number
+  }>
+  festivals: Array<{
+    name: string
+    description: string
+    date: string
+    significance: string
+  }>
+  symbols: Array<{
+    name: string
+    description: string
+    image: string
+    meaning: string
+  }>
+  images: string[]
+  tags: string[]
 }
 
-export default function ReligionsPage() {
+export default function EnhancedReligionsPage() {
   const [religions, setReligions] = useState<Religion[]>([])
+  const [selectedReligion, setSelectedReligion] = useState<Religion | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedReligion, setSelectedReligion] = useState<Religion | null>(null)
+  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
-    // Simple mock data to avoid API call issues
-    const mockReligions: Religion[] = [
-      {
-        id: '1',
-        name: 'Christianity',
-        introText: 'Christianity is an Abrahamic monotheistic religion based on the life and teachings of Jesus Christ of Nazareth.',
-        populationPercentage: 31.2,
-        foundingDate: 'c. 30 CE',
-        founder: 'Jesus Christ',
-        holyBooks: 'Bible (Old Testament, New Testament)',
-        coreBeliefs: 'Belief in one God, Jesus as the Son of God, resurrection, salvation through faith'
-      },
-      {
-        id: '2',
-        name: 'Islam',
-        introText: 'Islam is an Abrahamic monotheistic religion teaching that there is only one God (Allah) and that Muhammad is the messenger of God.',
-        populationPercentage: 24.1,
-        foundingDate: '7th century CE',
-        founder: 'Prophet Muhammad',
-        holyBooks: 'Quran (primary), Hadith, Sunnah',
-        coreBeliefs: 'Belief in one God (Allah), angels, revealed books, prophets, Day of Judgment, predestination'
-      },
-      {
-        id: '3',
-        name: 'Hinduism',
-        introText: 'Hinduism is an Indian religion and dharma, or way of life, widely practiced in the Indian subcontinent.',
-        populationPercentage: 15.1,
-        foundingDate: 'c. 2000 BCE',
-        founder: 'No single founder (diverse origins)',
-        holyBooks: 'Vedas, Upanishads, Puranas, Mahabharata, Ramayana, Bhagavad Gita',
-        coreBeliefs: 'Dharma, karma, moksha, samsara, various deities as manifestations of Brahman'
-      }
-    ]
-    
-    setReligions(mockReligions)
-    setLoading(false)
+    fetchReligions()
   }, [])
 
-  const filteredReligions = religions.filter(religion =>
-    religion.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    religion.introText.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const handleReligionClick = (religion: Religion) => {
-    setSelectedReligion(religion)
+  const fetchReligions = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/religions?limit=20')
+      const data = await response.json()
+      setReligions(data.religions || [])
+    } catch (error) {
+      console.error('Error fetching religions:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleBack = () => {
-    setSelectedReligion(null)
+  const fetchReligionDetails = async (id: string) => {
+    try {
+      const response = await fetch(`/api/religions/${id}`)
+      const data = await response.json()
+      setSelectedReligion(data)
+    } catch (error) {
+      console.error('Error fetching religion details:', error)
+    }
+  }
+
+  const filteredReligions = religions.filter(religion =>
+    (religion.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (religion.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (religion.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  const formatFollowers = (followers: number) => {
+    if (followers >= 1000000000) {
+      return `${(followers / 1000000000).toFixed(1)}B`
+    } else if (followers >= 1000000) {
+      return `${(followers / 1000000).toFixed(1)}M`
+    } else if (followers >= 1000) {
+      return `${(followers / 1000).toFixed(1)}K`
+    }
+    return followers.toString()
   }
 
   if (selectedReligion) {
@@ -89,7 +144,7 @@ export default function ReligionsPage() {
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700">
           <div className="max-w-6xl mx-auto px-4 py-12">
             <Button
-              onClick={handleBack}
+              onClick={() => setSelectedReligion(null)}
               className="mb-6 bg-amber-500 hover:bg-amber-600"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -120,66 +175,184 @@ export default function ReligionsPage() {
               )}
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-amber-500" />
-                <span>~{Math.round(selectedReligion.populationPercentage * 0.08)} billion followers</span>
+                <span>~{formatFollowers(selectedReligion.currentFollowers)} followers</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-amber-400 flex items-center">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Introduction
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-200 leading-relaxed">
-                    {selectedReligion.introText}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+        {/* Content Tabs */}
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
+              <TabsTrigger value="overview" className="text-white data-[state=active]:bg-amber-500">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="books" className="text-white data-[state=active]:bg-amber-500">
+                Books ({selectedReligion.books?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="text-white data-[state=active]:bg-amber-500">
+                Videos ({selectedReligion.videos?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="practices" className="text-white data-[state=active]:bg-amber-500">
+                Practices ({selectedReligion.practices?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="sects" className="text-white data-[state=active]:bg-amber-500">
+                Sects ({selectedReligion.sects?.length || 0})
+              </TabsTrigger>
+            </TabsList>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-amber-400">Holy Books</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-200">{selectedReligion.holyBooks}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+            <TabsContent value="overview" className="mt-6">
+              <div className="grid lg:grid-cols-2 gap-8">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                >
+                  <Card className="bg-slate-800 border-slate-700">
+                    <CardHeader>
+                      <CardTitle className="text-amber-400">Introduction</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-200 leading-relaxed">
+                        {selectedReligion.introText}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-8"
-          >
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-amber-400">Core Beliefs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-200">{selectedReligion.coreBeliefs}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  <Card className="bg-slate-800 border-slate-700">
+                    <CardHeader>
+                      <CardTitle className="text-amber-400">Key Beliefs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {selectedReligion.keyBeliefs.map((belief, index) => (
+                          <li key={index} className="text-slate-200 flex items-start">
+                            <span className="text-amber-400 mr-2">•</span>
+                            {belief}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="mt-8"
+              >
+                <Card className="bg-slate-800 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-amber-400">Sacred Texts</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {selectedReligion.sacredTexts.map((text, index) => (
+                        <div key={index} className="border-l-4 border-amber-500 pl-4">
+                          <h4 className="text-amber-400 font-semibold mb-1">{text.title}</h4>
+                          <p className="text-slate-300 text-sm mb-1">
+                            <span className="text-slate-400">Author:</span> {text.author} | 
+                            <span className="text-slate-400"> Language:</span> {text.language} | 
+                            <span className="text-slate-400"> Date:</span> {text.approximateDate}
+                          </p>
+                          <p className="text-slate-200">{text.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {selectedReligion.festivals && selectedReligion.festivals.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  className="mt-8"
+                >
+                  <Card className="bg-slate-800 border-slate-700">
+                    <CardHeader>
+                      <CardTitle className="text-amber-400">Major Festivals</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {selectedReligion.festivals.map((festival, index) => (
+                          <div key={index} className="bg-slate-700 p-4 rounded-lg">
+                            <h4 className="text-amber-400 font-semibold mb-2">{festival.name}</h4>
+                            <p className="text-slate-300 text-sm mb-1">
+                              <span className="text-slate-400">Date:</span> {festival.date}
+                            </p>
+                            <p className="text-slate-200 text-sm">{festival.significance}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="books" className="mt-6">
+              <BooksGrid religionId={selectedReligion._id} showFilters={true} />
+            </TabsContent>
+
+            <TabsContent value="videos" className="mt-6">
+              <VideosGrid religionId={selectedReligion._id} showFilters={true} />
+            </TabsContent>
+
+            <TabsContent value="practices" className="mt-6">
+              <div className="text-center py-16">
+                <Target className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+                <h3 className="text-xl font-semibold text-slate-400 mb-2">
+                  Practices Coming Soon
+                </h3>
+                <p className="text-slate-500">
+                  We're working on adding detailed practices and rituals for each religion.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="sects" className="mt-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {selectedReligion.sects.map((sect, index) => (
+                  <motion.div
+                    key={sect._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <Card className="bg-slate-800 border-slate-700 hover:border-amber-500 transition-all duration-300">
+                      <CardHeader>
+                        <CardTitle className="text-amber-400">{sect.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-slate-200 text-sm mb-4">
+                          {sect.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="border-slate-500 text-slate-300">
+                            ~{formatFollowers(sect.numberOfFollowers)} followers
+                          </Badge>
+                          <Button size="sm" className="bg-amber-500 hover:bg-amber-600">
+                            Learn More
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
         
         <AIChatWidget />
@@ -231,31 +404,28 @@ export default function ReligionsPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredReligions.map((religion, index) => (
               <motion.div
-                key={religion.id}
+                key={String(religion._id)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card 
-                  className="bg-slate-800 border-slate-700 hover:border-amber-500 transition-all duration-300 cursor-pointer hover:scale-105 h-full"
-                  onClick={() => handleReligionClick(religion)}
+                  className="bg-slate-800 border-slate-700 hover:border-amber-500 transition-all duration-300 h-full cursor-pointer hover:scale-105"
+                  onClick={() => fetchReligionDetails(religion._id)}
                 >
                   <CardHeader>
                     <CardTitle className="text-amber-400">{religion.name}</CardTitle>
-                    <CardDescription className="text-slate-300">
-                      {religion.populationPercentage}% of world population
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-200 text-sm line-clamp-4 mb-4">
                       {religion.introText}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-slate-600 text-slate-300">
-                        ~{Math.round(religion.populationPercentage * 0.08)}B followers
+                      <Badge variant="outline" className="border-slate-500 text-slate-300">
+                        {religion.populationPercentage}% of world population
                       </Badge>
                       <Button size="sm" className="bg-amber-500 hover:bg-amber-600">
-                        Learn More
+                        Explore
                       </Button>
                     </div>
                   </CardContent>

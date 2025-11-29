@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navigation from '@/components/Navigation'
 import AIChatWidget from '@/components/AIChatWidget'
 import { Search, Filter, User, Star, Clock, BookOpen } from 'lucide-react'
-import Link from 'next/link'
 
 interface Scholar {
   id: string
@@ -76,58 +75,75 @@ export default function ScholarsPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('All')
 
   useEffect(() => {
-    // Simple mock data to avoid API call issues
-    const mockScholars: Scholar[] = [
-      {
-        id: '1',
-        name: 'Augustine of Hippo',
-        era: '4th-5th century',
-        century: '4th-5th',
-        language: 'Latin',
-        isUniversallyRespected: true,
-        majorWorks: 'Confessions, City of God, On Christian Doctrine',
-        sect: {
-          name: 'Catholicism',
-          religion: {
-            name: 'Christianity'
-          }
-        }
-      },
-      {
-        id: '2',
-        name: 'Thomas Aquinas',
-        era: '13th century',
-        century: '13th',
-        language: 'Latin',
-        isUniversallyRespected: true,
-        majorWorks: 'Summa Theologica, Summa Contra Gentiles',
-        sect: {
-          name: 'Catholicism',
-          religion: {
-            name: 'Christianity'
-          }
-        }
-      },
-      {
-        id: '3',
-        name: 'Al-Ghazali',
-        era: '11th-12th century',
-        century: '11th-12th',
-        language: 'Arabic',
-        isUniversallyRespected: true,
-        majorWorks: 'Ihya Ulum al-Din, Tahafut al-Falasifa',
-        sect: {
-          name: 'Sunni Islam',
-          religion: {
-            name: 'Islam'
-          }
-        }
-      }
-    ]
-    
-    setScholars(mockScholars)
-    setLoading(false)
+    // Fetch from API
+    fetchScholars()
   }, [])
+
+  const fetchScholars = async () => {
+    try {
+      const response = await fetch('/api/scholars')
+      const data = await response.json()
+      
+      // If API returns data, use it; otherwise use mock data
+      if (data.scholars && data.scholars.length > 0) {
+        setScholars(data.scholars)
+      } else {
+        // Mock data fallback
+        const mockScholars: Scholar[] = [
+          {
+            id: '1',
+            name: 'Augustine of Hippo',
+            era: '4th-5th century',
+            century: '4th-5th',
+            language: 'Latin',
+            isUniversallyRespected: true,
+            majorWorks: 'Confessions, City of God, On Christian Doctrine',
+            sect: {
+              name: 'Catholicism',
+              religion: {
+                name: 'Christianity'
+              }
+            }
+          },
+          {
+            id: '2',
+            name: 'Thomas Aquinas',
+            era: '13th century',
+            century: '13th',
+            language: 'Latin',
+            isUniversallyRespected: true,
+            majorWorks: 'Summa Theologica, Summa Contra Gentiles',
+            sect: {
+              name: 'Catholicism',
+              religion: {
+                name: 'Christianity'
+              }
+            }
+          },
+          {
+            id: '3',
+            name: 'Al-Ghazali',
+            era: '11th-12th century',
+            century: '11th-12th',
+            language: 'Arabic',
+            isUniversallyRespected: true,
+            majorWorks: 'Ihya Ulum al-Din, Tahafut al-Falasifa',
+            sect: {
+              name: 'Sunni Islam',
+              religion: {
+                name: 'Islam'
+              }
+            }
+          }
+        ]
+        setScholars(mockScholars)
+      }
+    } catch (error) {
+      console.error('Error fetching scholars:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     let filtered = scholars
@@ -243,7 +259,7 @@ export default function ScholarsPage() {
             )}
           </div>
 
-          {/* Filter Panel */}
+          {/* Filter Panel - FIXED */}
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
             <div className="grid md:grid-cols-3 gap-6">
               <div>
@@ -252,7 +268,7 @@ export default function ScholarsPage() {
                 </label>
                 <Select value={selectedReligion} onValueChange={setSelectedReligion}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                    <SelectValue />
+                    <SelectValue placeholder="Select religion" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-700 border-slate-600">
                     {religions.map((religion) => (
@@ -270,7 +286,7 @@ export default function ScholarsPage() {
                 </label>
                 <Select value={selectedCentury} onValueChange={setSelectedCentury}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                    <SelectValue />
+                    <SelectValue placeholder="Select time period" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-700 border-slate-600">
                     {centuries.map((century) => (
@@ -288,7 +304,7 @@ export default function ScholarsPage() {
                 </label>
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                    <SelectValue />
+                    <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-700 border-slate-600">
                     {languages.map((language) => (
