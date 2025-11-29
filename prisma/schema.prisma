@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Religion {
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  introText           String
+  populationPercentage Float
+  foundingDate        String?
+  founder             String?
+  holyBooks           String
+  coreBeliefs         String
+  rituals             Ritual[]
+  sects               Sect[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Sect {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  religionId        String
+  religion          Religion @relation(fields: [religionId], references: [id], onDelete: Cascade)
+  keyCharacteristics String
+  scholars          Scholar[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Scholar {
+  id                    String   @id @default(cuid())
+  name                  String
+  era                   String
+  century               String
+  language              String
+  sectId                String
+  sect                  Sect     @relation(fields: [sectId], references: [id], onDelete: Cascade)
+  isUniversallyRespected Boolean @default(false)
+  biography             String?
+  majorWorks            String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Ritual {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  religionId  String
+  religion    Religion @relation(fields: [religionId], references: [id], onDelete: Cascade)
+  significance String
+  frequency   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
