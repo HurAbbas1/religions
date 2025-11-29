@@ -3,11 +3,12 @@ import { db } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
     const religion = await db.religion.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         sects: {
           include: {
