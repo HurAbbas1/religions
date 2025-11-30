@@ -748,6 +748,201 @@ export async function POST(request: NextRequest) {
     ])
     console.log(`✓ Created ${religions.length} religions`)
 
+    // create Sects
+    console.log('3.5. Creating sects...')
+    const sects = await Sect.create([
+      // Christianity Sects
+      {
+        name: 'Catholicism',
+        description: 'The largest branch of Christianity, led by the Pope.',
+        religionId: religions[0]._id, // Link to Christianity
+        religion: religions[0]._id,   // Double link for safety
+        numberOfFollowers: 1300000000,
+        keyCharacteristics: 'Papal authority, seven sacraments, veneration of saints.',
+        scholars: []
+      },
+      {
+        name: 'Protestantism',
+        description: 'A movement that began in the 16th century as a reaction against medieval Roman Catholic doctrines.',
+        religionId: religions[0]._id,
+        religion: religions[0]._id,
+        numberOfFollowers: 900000000,
+        keyCharacteristics: 'Sola Scriptura (Bible alone), justification by faith alone.',
+        scholars: []
+      },
+      // Islam Sects
+      {
+        name: 'Sunni Islam',
+        description: 'The largest denomination of Islam.',
+        religionId: religions[1]._id, // Link to Islam
+        religion: religions[1]._id,
+        numberOfFollowers: 1500000000,
+        keyCharacteristics: 'Follows the Sunnah of Muhammad, community consensus for leadership.',
+        scholars: []
+      },
+      {
+        name: 'Shia Islam',
+        description: 'The second largest denomination of Islam.',
+        religionId: religions[1]._id,
+        religion: religions[1]._id,
+        numberOfFollowers: 200000000,
+        keyCharacteristics: 'Belief that leadership belongs to the Ahl al-Bayt (family of the Prophet).',
+        scholars: []
+      },
+      {
+        name: 'Vedanta',
+        description: 'Major philosophical tradition focusing on the Upanishads.',
+        religionId: religions[2]._id,
+        religion: religions[2]._id,
+        numberOfFollowers: 800000000, 
+        keyCharacteristics: 'Focus on Brahman, Atman, and nature of reality.',
+        scholars: []
+      },
+      // 5. Bhakti Movement (Hinduism) - NEW
+      {
+        name: 'Bhakti Tradition',
+        description: 'Devotional worship of a supreme deity.',
+        religionId: religions[2]._id,
+        religion: religions[2]._id,
+        numberOfFollowers: 300000000, 
+        keyCharacteristics: 'Personal devotion, love for God (Bhakti).',
+        scholars: []
+      }
+    ])
+    console.log(`✓ Created ${sects.length} sects`)
+
+    // Create Scholars
+    console.log('3.8. Creating scholars...')
+    const scholars = await Scholar.create([
+      // --- CHRISTIANITY SCHOLARS ---
+      {
+        name: 'Augustine of Hippo',
+        era: 'Ancient',
+        century: '4th-5th',
+        language: 'Latin',
+        isUniversallyRespected: true,
+        majorWorks: 'Confessions, City of God',
+        sect: sects[0]._id, // Catholicism
+        religionId: religions[0]._id
+      },
+      {
+        name: 'Thomas Aquinas',
+        era: 'Medieval',
+        century: '13th',
+        language: 'Latin',
+        isUniversallyRespected: true,
+        majorWorks: 'Summa Theologica',
+        sect: sects[0]._id, // Catholicism
+        religionId: religions[0]._id
+      },
+      {
+        name: 'Martin Luther',
+        era: 'Reformation',
+        century: '16th',
+        language: 'German',
+        isUniversallyRespected: false, // Respected by Protestants, controversial to Catholics
+        majorWorks: '95 Theses, Large Catechism',
+        sect: sects[1]._id, // Protestantism
+        religionId: religions[0]._id
+      },
+      {
+        name: 'C.S. Lewis',
+        era: 'Modern',
+        century: '20th',
+        language: 'English',
+        isUniversallyRespected: true,
+        majorWorks: 'Mere Christianity, The Problem of Pain',
+        sect: sects[1]._id, // Protestantism (Anglican)
+        religionId: religions[0]._id
+      },
+
+      // --- ISLAM SCHOLARS ---
+      {
+        name: 'Al-Ghazali',
+        era: 'Medieval',
+        century: '11th-12th',
+        language: 'Arabic',
+        isUniversallyRespected: true,
+        majorWorks: 'The Revival of the Religious Sciences (Ihya)',
+        sect: sects[2]._id, // Sunni
+        religionId: religions[1]._id
+      },
+      {
+        name: 'Jalal al-Din Rumi',
+        era: 'Medieval',
+        century: '13th',
+        language: 'Persian',
+        isUniversallyRespected: true,
+        majorWorks: 'The Masnavi',
+        sect: sects[2]._id, // Sunni (Sufi)
+        religionId: religions[1]._id
+      },
+      {
+        name: 'Ja\'far al-Sadiq',
+        era: 'Ancient',
+        century: '8th',
+        language: 'Arabic',
+        isUniversallyRespected: true,
+        majorWorks: 'Hadith traditions, Jurisprudence',
+        sect: sects[3]._id, // Shia (also respected by Sunni)
+        religionId: religions[1]._id
+      },
+      {
+        name: 'Ibn Sina (Avicenna)',
+        era: 'Medieval',
+        century: '10th-11th',
+        language: 'Arabic/Persian',
+        isUniversallyRespected: true,
+        majorWorks: 'The Book of Healing',
+        sect: sects[2]._id, // Sunni context (Philosopher)
+        religionId: religions[1]._id
+      },
+
+      // --- HINDUISM SCHOLARS ---
+      {
+        name: 'Adi Shankara',
+        era: 'Ancient',
+        century: '8th',
+        language: 'Sanskrit',
+        isUniversallyRespected: true,
+        majorWorks: 'Brahmasutra Bhashya, Vivekachudamani',
+        sect: sects[4]._id, // Vedanta
+        religionId: religions[2]._id
+      },
+      {
+        name: 'Swami Vivekananda',
+        era: 'Modern',
+        century: '19th',
+        language: 'English/Bengali',
+        isUniversallyRespected: true,
+        majorWorks: 'Raja Yoga, Karma Yoga',
+        sect: sects[4]._id, // Vedanta
+        religionId: religions[2]._id
+      },
+      {
+        name: 'Tulsidas',
+        era: 'Medieval',
+        century: '16th',
+        language: 'Awadhi (Hindi)',
+        isUniversallyRespected: true,
+        majorWorks: 'Ramcharitmanas',
+        sect: sects[5]._id, // Bhakti
+        religionId: religions[2]._id
+      },
+      {
+        name: 'Ramanuja',
+        era: 'Medieval',
+        century: '11th-12th',
+        language: 'Sanskrit/Tamil',
+        isUniversallyRespected: true,
+        majorWorks: 'Sri Bhashya',
+        sect: sects[4]._id, // Vedanta (Vishishtadvaita)
+        religionId: religions[2]._id
+      }
+    ])
+    console.log(`✓ Created ${scholars.length} scholars`)
+
+    
     // Create sample Books
     console.log('4. Creating books...')
     const books = await Book.create([
@@ -797,7 +992,7 @@ export async function POST(request: NextRequest) {
       {
         title: 'Introduction to Christianity',
         description: 'A comprehensive overview of Christian beliefs, practices, and history.',
-        youtubeId: 'abc123',
+        youtubeId: 'qqJDmFN7KBw',
         duration: '45:30',
         channel: 'Religious Studies',
         category: 'lecture',
@@ -807,10 +1002,166 @@ export async function POST(request: NextRequest) {
         religionId: religions[0]._id,
         tags: ['christianity', 'introduction', 'beliefs']
       },
+       {
+        title: 'Christianity from Judaism to Constantine: Crash Course World History #11',
+        description: 'A concise, educational history of Christianity’s origins: from Judaism, through the Roman Empire, the life of Jesus, Paul, and how Christianity spread.',
+        youtubeId: 'TG55ErfdaeY',
+        duration: '11:30',
+        channel: 'CrashCourse',
+        category: 'lecture',
+        difficulty: 'beginner',
+        language: 'English',
+        rating: 4.8,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'history', 'romans', 'jesus']
+      },
+      {
+        title: 'From Jesus to Christ: The First Christians, Part One (full documentary)',
+        description: 'Documentary tracing how the early believers forged what became Christianity: social, political, and historical context under Roman rule.',
+        youtubeId: 'JN8FM1NCOSk',
+        duration: '54:20',
+        channel: 'PBS Frontline',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.9,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'documentary', 'history', 'rome']
+      },
+      {
+        title: 'From Jesus to Christ: The First Christians, Part Two (full documentary)',
+        description: 'Continuation of the “First Christians” story: how early Christian communities evolved after Jesus, and how their writings and beliefs formed.',
+        youtubeId: 'GXqFvfCaFwY',
+        duration: '55:10',
+        channel: 'PBS Frontline',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.9,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'documentary', 'early-church']
+      },
+      {
+        title: 'History of Christianity from an Academic Point of View',
+        description: 'A long-form, comprehensive survey of Christian history — covering major branches (Catholic, Orthodox, Protestant), schisms and denominational evolution.',
+        youtubeId: '8q6FUlay-M8',
+        duration: '2:15:00',
+        channel: 'YaleCourses',
+        category: 'lecture',
+        difficulty: 'advanced',
+        language: 'English',
+        rating: 4.7,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'academic', 'theology', 'history']
+      },
+      {
+        title: 'The Entire History of Christianity: From Jesus to the Modern World',
+        description: 'A documentary covering ~2,000 years: early church, Roman era, Middle Ages, Reformation, global expansion — very useful for wide historical overview.',
+        youtubeId: 'G3du0UcrirQ',
+        duration: '1:30:00',
+        channel: 'History Time',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.8,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'history', 'overview']
+      },
+      {
+        title: 'How Did Christianity Start and Spread | Brief History of Christianity',
+        description: 'Short & straightforward video summarizing how Christianity began from Jewish roots then spread through Roman-era cultural and political structures.',
+        youtubeId: '755CLtpeuXA',
+        duration: '12:45',
+        channel: 'History Matters',
+        category: 'lecture',
+        difficulty: 'beginner',
+        language: 'English',
+        rating: 4.5,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'summary', 'spread']
+      },
+      {
+        title: 'Church History: Complete Documentary AD 33 to Present',
+        description: 'Documentary that tracks Christian history from the very early church (after Jesus) through to modern times — covering major events, councils, growth, changes.',
+        youtubeId: 'xFIXMM1KWyc',
+        duration: '1:45:00',
+        channel: 'Christian History',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.6,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'church-history', 'documentary']
+      },
+      {
+        title: 'The Full History of the Church (6th–16th Century) | Documentary',
+        description: 'Focused on the Middle Ages: covers monasticism, church councils, the Great Schism, the beginning of Protestant movements — essential for medieval-era history.',
+        youtubeId: '1uhGR8S6NaI',
+        duration: '58:00',
+        channel: 'Real Crusade History',
+        category: 'documentary',
+        difficulty: 'advanced',
+        language: 'English',
+        rating: 4.5,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'medieval', 'middle-ages', 'schism']
+      },
+      {
+        title: 'How Christianity Divided the Roman Empire | Colosseum | History',
+        description: 'Looks at Christianity’s influence on Roman Empire dynamics: how the faith spread, changed society, and intersected with Roman political and social structures.',
+        youtubeId: '7IRPGKP1kJc',
+        duration: '42:00',
+        channel: 'History Channel',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.7,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'rome', 'politics', 'history']
+      },
+      {
+        title: 'Dave Stotts: The Origins of Christianity | The State of Faith | TBN',
+        description: 'Explores ancient Christian holy sites and early church history — gives a more “on-the-ground / archaeological + faith community” perspective.',
+        youtubeId: 'UPPXguGkCOA',
+        duration: '28:30',
+        channel: 'TBN',
+        category: 'documentary',
+        difficulty: 'beginner',
+        language: 'English',
+        rating: 4.6,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'archaeology', 'origins']
+      },
+      {
+        title: 'Europe’s Untold Christian History | Parable Investigates',
+        description: 'Investigative-style documentary questioning common narratives: how Christianity actually spread in Europe including within Roman army and through historical events.',
+        youtubeId: 'Q113IYFh5z4',
+        duration: '48:15',
+        channel: 'Parable',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.5,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'europe', 'history']
+      },
+      {
+        title: 'The History Of Christianity With Bamber Gascoigne | The Christians',
+        description: 'Classical documentary tracing Christianity’s influence and impact over nearly two millennia — touching on major shifts, cultural influence, and global spread.',
+        youtubeId: 'H4rATrTJsNs',
+        duration: '55:00',
+        channel: 'Our History',
+        category: 'documentary',
+        difficulty: 'intermediate',
+        language: 'English',
+        rating: 4.7,
+        religionId: religions[0]._id,
+        tags: ['christianity', 'history', 'culture']
+      },
       {
         title: 'Understanding the Quran',
         description: 'Deep dive into the meaning and context of Quranic verses.',
-        youtubeId: 'def456',
+        youtubeId: 'https://www.youtube.com/watch?v=KkgPIOXCU1I',
         duration: '60:15',
         channel: 'Islamic Learning',
         category: 'lecture',
@@ -898,6 +1249,34 @@ export async function POST(request: NextRequest) {
       }
     ])
     console.log(`✓ Created ${practices.length} practices`)
+      console.log('7. Linking resources to religions...')
+    
+    // Link to Christianity (religions[0])
+    await Religion.findByIdAndUpdate(religions[0]._id, {
+      $push: {
+        books: books[0]._id,
+        videos: videos[0]._id,
+        practices: practices[0]._id
+      }
+    })
+    
+    // Link to Islam (religions[1])
+    await Religion.findByIdAndUpdate(religions[1]._id, {
+      $push: {
+        books: books[1]._id,
+        videos: videos[1]._id,
+        practices: practices[1]._id
+      }
+    })
+    
+    // Link to Hinduism (religions[2])
+    await Religion.findByIdAndUpdate(religions[2]._id, {
+      $push: {
+        books: books[2]._id
+      }
+    })
+    
+    console.log('✓ Resources linked to religions')
 
     console.log('=== Seed Completed Successfully ===')
 

@@ -150,14 +150,20 @@ export default function VideosGrid({ religionId, showFilters = true }: VideosGri
     }
   }
 
-  const formatViews = (views: number) => {
-    if (views >= 1000000) {
-      return `${(views / 1000000).toFixed(1)}M`
-    } else if (views >= 1000) {
-      return `${(views / 1000).toFixed(1)}K`
-    }
-    return views.toString()
+ // Inside src/components/VideosGrid.tsx
+
+const formatViews = (views: number | undefined | null) => {
+  // FIX: If views doesn't exist, default to "0"
+  if (!views) return "0"
+  
+  if (views >= 1000000) {
+    return `${(views / 1000000).toFixed(1)}M`
   }
+  if (views >= 1000) {
+    return `${(views / 1000).toFixed(1)}K`
+  }
+  return views.toString()
+}
 
   return (
     <div className="space-y-6">

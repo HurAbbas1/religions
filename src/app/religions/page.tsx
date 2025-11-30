@@ -11,6 +11,8 @@ import Navigation from '@/components/Navigation'
 import AIChatWidget from '@/components/AIChatWidget'
 import BooksGrid from '@/components/BooksGrid'
 import VideosGrid from '@/components/VideosGrid'
+import PracticeGrid from '@/components/PracticeGrid'
+import SectsGrid from '@/components/SectsGrid'
 import { ArrowLeft, Search, BookOpen, Play, Users, Target, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
@@ -310,47 +312,13 @@ export default function EnhancedReligionsPage() {
             </TabsContent>
 
             <TabsContent value="practices" className="mt-6">
-              <div className="text-center py-16">
-                <Target className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-                <h3 className="text-xl font-semibold text-slate-400 mb-2">
-                  Practices Coming Soon
-                </h3>
-                <p className="text-slate-500">
-                  We're working on adding detailed practices and rituals for each religion.
-                </p>
-              </div>
+              <PracticeGrid religionId={selectedReligion._id} showFilters={true} />
             </TabsContent>
 
             <TabsContent value="sects" className="mt-6">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {selectedReligion.sects.map((sect, index) => (
-                  <motion.div
-                    key={sect._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <Card className="bg-slate-800 border-slate-700 hover:border-amber-500 transition-all duration-300">
-                      <CardHeader>
-                        <CardTitle className="text-amber-400">{sect.name}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-slate-200 text-sm mb-4">
-                          {sect.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <Badge variant="outline" className="border-slate-500 text-slate-300">
-                            ~{formatFollowers(sect.numberOfFollowers)} followers
-                          </Badge>
-                          <Button size="sm" className="bg-amber-500 hover:bg-amber-600">
-                            Learn More
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
+                {/* The SectsGrid component now handles fetching and displaying the sects. 
+                  We just need to pass the religion ID. */}
+                 <SectsGrid religionId={selectedReligion._id} />
             </TabsContent>
           </Tabs>
         </div>

@@ -12,7 +12,7 @@ import AIChatWidget from '@/components/AIChatWidget'
 import { Search, Filter, User, Star, Clock, BookOpen } from 'lucide-react'
 
 interface Scholar {
-  id: string
+  _id: string
   name: string
   era: string
   century: string
@@ -79,62 +79,18 @@ export default function ScholarsPage() {
     fetchScholars()
   }, [])
 
-  const fetchScholars = async () => {
+ const fetchScholars = async () => {
     try {
       const response = await fetch('/api/scholars')
       const data = await response.json()
       
-      // If API returns data, use it; otherwise use mock data
-      if (data.scholars && data.scholars.length > 0) {
-        setScholars(data.scholars)
+      // FIX: Check if 'data' itself is an array, not 'data.scholars'
+      if (Array.isArray(data) && data.length > 0) {
+        setScholars(data)
       } else {
         // Mock data fallback
         const mockScholars: Scholar[] = [
-          {
-            id: '1',
-            name: 'Augustine of Hippo',
-            era: '4th-5th century',
-            century: '4th-5th',
-            language: 'Latin',
-            isUniversallyRespected: true,
-            majorWorks: 'Confessions, City of God, On Christian Doctrine',
-            sect: {
-              name: 'Catholicism',
-              religion: {
-                name: 'Christianity'
-              }
-            }
-          },
-          {
-            id: '2',
-            name: 'Thomas Aquinas',
-            era: '13th century',
-            century: '13th',
-            language: 'Latin',
-            isUniversallyRespected: true,
-            majorWorks: 'Summa Theologica, Summa Contra Gentiles',
-            sect: {
-              name: 'Catholicism',
-              religion: {
-                name: 'Christianity'
-              }
-            }
-          },
-          {
-            id: '3',
-            name: 'Al-Ghazali',
-            era: '11th-12th century',
-            century: '11th-12th',
-            language: 'Arabic',
-            isUniversallyRespected: true,
-            majorWorks: 'Ihya Ulum al-Din, Tahafut al-Falasifa',
-            sect: {
-              name: 'Sunni Islam',
-              religion: {
-                name: 'Islam'
-              }
-            }
-          }
+          // ... keep your mock data here as fallback ...
         ]
         setScholars(mockScholars)
       }
@@ -333,7 +289,7 @@ export default function ScholarsPage() {
         >
           {filteredScholars.map((scholar, index) => (
             <motion.div
-              key={scholar.id}
+              key={scholar._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -357,7 +313,8 @@ export default function ScholarsPage() {
                     <div className="flex items-center space-x-2 text-sm mt-1">
                       <span className="text-amber-500">{scholar.language}</span>
                       <span>•</span>
-                      <span>{scholar.sect.religion.name}</span>
+                      {/* Use ?. to safely access nested properties */}
+                      <span>{scholar.sect?.religion?.name || 'Unknown Religion'}</span>
                     </div>
                   </CardDescription>
                 </CardHeader>

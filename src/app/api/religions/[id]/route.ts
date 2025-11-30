@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import { Religion, Book, Video, Practice, Sect, Scholar } from '@/lib/mongodb-models'
-import mongoose from 'mongoose' // <--- ADDED THIS IMPORT
+import mongoose from 'mongoose'
 
 // GET /api/religions/[id] - Get single religion with all related content
 export async function GET(
@@ -12,25 +12,16 @@ export async function GET(
     await connectDB()
     const { id } = await context.params
     
-    // --- START: SAFETY CHECK ---
-    // If ID is missing, "undefined", or not a valid Mongo ID, stop here.
+    // --- SAFETY CHECK ---
     if (!id || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid Religion ID provided' },
         { status: 400 }
       )
     }
-    // --- END: SAFETY CHECK ---
 
+    // 1. Fetch the Religion document
     const religion = await Religion.findById(id)
-      .populate({
-        path: 'sects',
-        populate: {
-          path: 'scholars',
-          model: 'Scholar'
-        }
-      })
-      .populate('scholars')
       .populate({
         path: 'books',
         options: { sort: { rating: -1 } }
@@ -43,6 +34,7 @@ export async function GET(
         path: 'practices',
         options: { sort: { rating: -1 } }
       })
+      .lean()
 
     if (!religion) {
       return NextResponse.json(
@@ -51,7 +43,28 @@ export async function GET(
       )
     }
 
+    // 2. Manually fetch Sects (Reverse Lookup)
+    // UPDATED: We use $or to check BOTH 'religion' and 'religionId' fields.
+    // This fixes the issue if your database schema uses a different name than expected.
+    const sects = await Sect.find({ 
+      $or: [
+        { religion: id },
+        { religionId: id }
+      ]
+    })
+      .populate('scholars') 
+      .lean()
+
+    // Debug log to help you verify data is actually being found
+    console.log(`[API] Fetching Religion: ${religion.name} (${id})`)
+    console.log(`[API] Found ${sects.length} sects associated with this religion.`)
+
+    // 3. Attach the fetched sects to the religion object
+    // @ts-ignore
+    religion.sects = sects
+
     return NextResponse.json(religion)
+
   } catch (error) {
     console.error('Error fetching religion:', error)
     return NextResponse.json(
@@ -70,14 +83,12 @@ export async function PUT(
     await connectDB()
     const { id } = await context.params
 
-    // --- START: SAFETY CHECK ---
     if (!id || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
         return NextResponse.json(
           { error: 'Invalid Religion ID provided' },
           { status: 400 }
         )
       }
-    // --- END: SAFETY CHECK ---
 
     const body = await request.json()
     

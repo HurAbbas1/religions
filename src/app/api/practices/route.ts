@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
         { instructions: { $regex: search, $options: 'i' } },
-        { benefits: { $in: [new RegExp(search, 'i')] }
+        { benefits: { $in: [new RegExp(search, 'i')] } },
       ]
     }
     if (religion) {

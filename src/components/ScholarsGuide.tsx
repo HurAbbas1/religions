@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Filter, User, Star, Clock, BookOpen, X } from 'lucide-react'
 
 interface Scholar {
-  id: string
+  _id: string
   name: string
   era: string
   century: string
@@ -296,7 +296,7 @@ export default function ScholarsGuide() {
         >
           {filteredScholars.map((scholar, index) => (
             <motion.div
-              key={scholar.id}
+              key={scholar._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}

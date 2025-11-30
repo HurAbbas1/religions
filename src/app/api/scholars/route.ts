@@ -1,55 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import connectDB from '@/lib/mongodb'
+import { Scholar } from '@/lib/mongodb-models'
 
 export async function GET(request: NextRequest) {
   try {
+    await connectDB()
+
     const { searchParams } = new URL(request.url)
     const religion = searchParams.get('religion')
     const century = searchParams.get('century')
     const language = searchParams.get('language')
 
-    const where: any = {}
+    const pipeline: any[] = []
 
-    if (religion) {
-      where.sect = {
-        religion: {
-          name: {
-            contains: religion,
-            mode: 'insensitive'
-          }
-        }
+    pipeline.push({
+      $lookup: {
+        from: 'sects', 
+        localField: 'sect',
+        foreignField: '_id',
+        as: 'sectData'
       }
-    }
+    })
+    pipeline.push({ $unwind: { path: '$sectData', preserveNullAndEmptyArrays: true } })
 
-    if (century) {
-      where.century = {
-        contains: century,
-        mode: 'insensitive'
+    pipeline.push({
+      $lookup: {
+        from: 'religions',
+        localField: 'sectData.religion',
+        foreignField: '_id',
+        as: 'religionData'
       }
-    }
+    })
+    pipeline.push({ $unwind: { path: '$religionData', preserveNullAndEmptyArrays: true } })
 
-    if (language) {
-      where.language = {
-        contains: language,
-        mode: 'insensitive'
-      }
-    }
+    const matchStage: any = {}
+    if (century) matchStage.century = { $regex: century, $options: 'i' }
+    if (language) matchStage.language = { $regex: language, $options: 'i' }
+    if (religion) matchStage['religionData.name'] = { $regex: religion, $options: 'i' }
 
-    const scholars = await db.scholar.findMany({
-      where,
-      include: {
+    pipeline.push({ $match: matchStage })
+
+    pipeline.push({
+      $sort: { isUniversallyRespected: -1 } 
+    })
+
+    pipeline.push({
+      $project: {
+        name: 1,
+        century: 1,
+        language: 1,
+        isUniversallyRespected: 1,
+        image: 1,
+        // --- ADDED MISSING FIELDS ---
+        era: 1,
+        majorWorks: 1,
+        // --------------------------
         sect: {
-          include: {
-            religion: true
-          }
+          _id: '$sectData._id',
+          name: '$sectData.name', 
+          religion: '$religionData'
         }
-      },
-      orderBy: {
-        isUniversallyRespected: 'desc'
       }
     })
 
+    const scholars = await Scholar.aggregate(pipeline)
+
     return NextResponse.json(scholars)
+    
   } catch (error) {
     console.error('Error fetching scholars:', error)
     return NextResponse.json(
