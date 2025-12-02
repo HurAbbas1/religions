@@ -5,13 +5,19 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Navigation from '@/components/Navigation'
-import AIChatWidget from '@/components/AIChatWidget'
 import { ArrowRight, BookOpen, Users, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+// 1. Import the Hook
+import { useChat } from '@/context/ChatContext'
 
 const philosophicalText = "When a person starts to think: Why am I? Who am I? What am I? And from when am I? Then the person starts to think about God."
 
 export default function Home() {
+  // 2. Use the Context Hook instead of local state
+  const { setIsOpen } = useChat()
+  
+  // REMOVED: const [isChatOpen, setIsChatOpen] = useState(false)
+  
   const [displayText, setDisplayText] = useState('')
   const [showButton, setShowButton] = useState(false)
 
@@ -210,9 +216,12 @@ export default function Home() {
                       Get thoughtful answers to spiritual questions
                     </p>
                     <div className="text-sm text-slate-400">
-                      Available as floating widget on all pages
                     </div>
-                    <Button className="w-full bg-amber-500 hover:bg-amber-600" disabled>
+                    {/* 3. Update the button to use the Context Switch */}
+                    <Button 
+                      className="w-full bg-amber-500 hover:bg-amber-600"
+                      onClick={() => setIsOpen(true)}
+                    >
                       Ask AI (Widget)
                     </Button>
                   </CardContent>
@@ -222,7 +231,7 @@ export default function Home() {
         </div>
       </section>
       
-      <AIChatWidget />
+      {/* 4. REMOVED <AIChatWidget /> (It is now in layout.tsx) */}
     </div>
   )
 }

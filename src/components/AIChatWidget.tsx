@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { MessageCircle, Send, X, Bot, User } from 'lucide-react'
+// 1. Import the Hook
+import { useChat } from '@/context/ChatContext'
 
 interface Message {
   id: string
@@ -15,8 +17,12 @@ interface Message {
   timestamp: Date
 }
 
+// 2. Remove Props (It now gets data from the "Cloud" / Context)
 export default function AIChatWidget() {
-  const [isOpen, setIsOpen] = useState(false)
+  
+  // 3. Use the Context Hook
+  const { isOpen, setIsOpen } = useChat()
+  
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)

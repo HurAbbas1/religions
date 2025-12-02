@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import ZAI from 'z-ai-web-dev-sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const SYSTEM_PROMPT = `You are a respectful, academic theologian with deep knowledge of all world scriptures and religious traditions. 
 
@@ -17,7 +17,8 @@ Always maintain a tone of respect, scholarship, and spiritual sensitivity.`
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json()
+    const body = await request.json()
+    const { message } = body
 
     if (!message) {
       return NextResponse.json(
@@ -26,34 +27,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const zai = await ZAI.create()
-
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: 'user',
-          content: message
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000
-    })
-
-    const response = completion.choices[0]?.message?.content
-
-    if (!response) {
-      throw new Error('No response from AI')
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'Gemini API Key is missing' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json({ response })
-  } catch (error) {
-    console.error('Error in chat API:', error)
+    const genAI = new GoogleGenerativeAI(apiKey)
+    
+    // ✅ FIX: Using a valid model name from your list
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+    const finalPrompt = `${SYSTEM_PROMPT}\n\nUser Question: ${message}\n\nAnswer:`
+
+    const result = await model.generateContent(finalPrompt)
+    const response = await result.response
+    const text = response.text()
+
+    return NextResponse.json({ response: text })
+
+  } catch (error: any) {
+    console.error('Chat API Error:', error)
     return NextResponse.json(
-      { error: 'Failed to process your request' },
+      { error: error.message || 'Failed to process your request' },
       { status: 500 }
     )
   }

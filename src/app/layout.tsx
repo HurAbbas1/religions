@@ -3,6 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
+// 1. Import the Context Provider and the Widget
+import { ChatProvider } from "@/context/ChatContext";
+import AIChatWidget from "@/components/AIChatWidget";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -45,8 +49,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        {/* 2. Wrap everything inside ChatProvider */}
+        <ChatProvider>
+          {children}
+          <Toaster />
+          
+          {/* 3. Place the Global Widget here */}
+          <AIChatWidget />
+        </ChatProvider>
       </body>
     </html>
   );
